@@ -1,0 +1,7 @@
+[jobs.pascal_lex]
+image = { source = "dockerfile", path = ".", tag = "pascal-lex-st2r" }
+run = ["./target/release/st2r-compiler pascal_lex $input", ]
+
+[jobs.opg]
+image = { source = "dockerfile", path = ".", tag = "pascal-lex-st2r" }
+run = ["./target/release/st2r-compiler opg $input"]
