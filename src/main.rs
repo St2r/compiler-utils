@@ -6,6 +6,7 @@ use std::env::args;
 use crate::Priority::{Less, More, Equal};
 use std::u32::MAX;
 use std::ops::Index;
+use std::fs;
 
 fn main() {
     let mut handlers: HashMap<&str, &dyn Fn(&[String]) -> ()> = HashMap::new();
@@ -29,7 +30,8 @@ enum Priority {
 
 // https://oj.karenia.cc/suite/1ft03dkbb240y
 fn process_opg(para: &[String]) {
-    let mut input: String = para[0].to_string();
+    let path: String = para[0].to_string();
+    let mut input = fs::read_to_string(path).unwrap();
     input.push('#');
     let mut token_stack: VecDeque<char> = VecDeque::new();
     let mut n_stack: VecDeque<char> = VecDeque::new();
