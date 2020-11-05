@@ -46,21 +46,25 @@ fn process_opg(para: &[String]) {
             continue;
         }
 
+        // 判断是否是终结符
         if !set_t.contains(&char) && char != '#' {
             println!("E");
             return;
         }
+
+        // 计算优先级并分情况
         let mut p: Priority = pb.compare_priority(token_stack.back().unwrap(), &char);
         if p == Priority::None {
+            // 无法计算优先级或者两个终结符不能相邻
             println!("E");
             return;
         } else if p == Priority::More {
+            // 出现大于，开始规约
             while p == Priority::More {
                 // 规约
-                let mut s: VecDeque<char> = VecDeque::new();
                 while !priority_stack.is_empty() && *priority_stack.back().unwrap() == Priority::Equal {
                     priority_stack.pop_back();
-                    s.push_front(token_stack.pop_back().unwrap());
+                    token_stack.pop_back();
                 }
                 if priority_stack.is_empty() || *priority_stack.back().unwrap() != Priority::Less {
                     println!("RE");
@@ -68,32 +72,45 @@ fn process_opg(para: &[String]) {
                 }
 
                 priority_stack.pop_back();
-                s.push_front(token_stack.pop_back().unwrap());
+                let s = token_stack.pop_back().unwrap();
                 p = pb.compare_priority(token_stack.back().unwrap(), &char);
 
                 // todo 规约
-                match s.pop_front().unwrap() {
+                match s {
                     '(' => {
-                        if s.pop_back().unwrap() != ')' || !s.is_empty() {
+                        if n_stack.len() < 3
+                            || n_stack.pop_back().unwrap() != ')'
+                            || n_stack.pop_back().unwrap() != 'N'
+                            || n_stack.pop_back().unwrap() != '(' {
                             println!("RE");
                             return;
                         }
-                        n_stack.pop_back();
-                    },
-                    '+' | '*'=> {
-                        if !s.is_empty()  || n_stack.len() < 2 {
+                    }
+                    '+' => {
+                        if n_stack.len() < 3
+                            || n_stack.pop_back().unwrap() != 'N'
+                            || n_stack.pop_back().unwrap() != '+'
+                            || n_stack.pop_back().unwrap() != 'N' {
                             println!("RE");
                             return;
                         }
-                        n_stack.pop_back();
-                        n_stack.pop_back();
-                    },
+                    }
+                    '*' => {
+                        if n_stack.len() < 3
+                            || n_stack.pop_back().unwrap() != 'N'
+                            || n_stack.pop_back().unwrap() != '*'
+                            || n_stack.pop_back().unwrap() != 'N' {
+                            println!("RE");
+                            return;
+                        }
+                    }
                     'i' => {
-                        if !s.is_empty() {
+                        if n_stack.len() < 1
+                            || n_stack.pop_back().unwrap() != 'i' {
                             println!("RE");
                             return;
                         }
-                    },
+                    }
                     _ => {
                         println!("RE");
                         return;
@@ -111,6 +128,7 @@ fn process_opg(para: &[String]) {
                 return;
             }
             println!("I{}", char);
+            n_stack.push_back(char);
             priority_stack.push_back(p);
             token_stack.push_back(char);
         } else {
@@ -121,6 +139,7 @@ fn process_opg(para: &[String]) {
                 return;
             }
             println!("I{}", char);
+            n_stack.push_back(char);
             priority_stack.push_back(p);
             token_stack.push_back(char);
         }
