@@ -75,11 +75,6 @@ fn process_opg(para: &[String]) {
                 let s = token_stack.pop_back().unwrap();
                 p = pb.compare_priority(token_stack.back().unwrap(), &char);
 
-                if p == Priority::None && *token_stack.back().unwrap() != '#' {
-                    println!("E");
-                    return;
-                }
-
                 // todo 规约
                 match s {
                     '(' => {
@@ -125,6 +120,11 @@ fn process_opg(para: &[String]) {
                 n_stack.push_back('N');
 
                 println!("R");
+
+                if p == Priority::None && *token_stack.back().unwrap() != '#' {
+                    println!("E");
+                    return;
+                }
             }
             if char == '#' {
                 if !token_stack.is_empty() && n_stack.len() != 1 {
