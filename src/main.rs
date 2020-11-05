@@ -42,6 +42,10 @@ fn process_opg(para: &[String]) {
     let pb = PriorityBuilder::new();
 
     for char in input.chars() {
+        if char.is_ascii_whitespace() {
+            continue;
+        }
+
         if !set_t.contains(&char) && char != '#' {
             println!("E");
             return;
