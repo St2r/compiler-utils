@@ -76,7 +76,7 @@ fn process_opg(para: &[String]) {
                 p = pb.compare_priority(token_stack.back().unwrap(), &char);
 
                 if p == Priority::None {
-                    println!("RE");
+                    println!("E");
                     return;
                 }
 
