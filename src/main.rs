@@ -51,12 +51,12 @@ fn process_opg(para: &[String]) {
             println!("E");
             return;
         } else if p == Priority::More {
-
             while p == Priority::More {
                 // 规约
+                let mut s: VecDeque<char> = VecDeque::new();
                 while !priority_stack.is_empty() && *priority_stack.back().unwrap() == Priority::Equal {
                     priority_stack.pop_back();
-                    token_stack.pop_back();
+                    s.push_front(token_stack.pop_back().unwrap());
                 }
                 if priority_stack.is_empty() || *priority_stack.back().unwrap() != Priority::Less {
                     println!("RE");
@@ -64,12 +64,44 @@ fn process_opg(para: &[String]) {
                 }
 
                 priority_stack.pop_back();
-                token_stack.pop_back();
+                s.push_front(token_stack.pop_back().unwrap());
                 p = pb.compare_priority(token_stack.back().unwrap(), &char);
+
+                // todo 规约
+                match s.pop_front().unwrap() {
+                    '(' => {
+                        if s.pop_back().unwrap() != ')' || !s.is_empty() {
+                            println!("RE");
+                            return;
+                        }
+                        n_stack.pop_back();
+                    },
+                    '+' | '*'=> {
+                        if !s.is_empty()  || n_stack.len() < 2 {
+                            println!("RE");
+                            return;
+                        }
+                        n_stack.pop_back();
+                        n_stack.pop_back();
+                    },
+                    'i' => {
+                        if !s.is_empty() {
+                            println!("RE");
+                            return;
+                        }
+                    },
+                    _ => {
+                        println!("RE");
+                        return;
+                    }
+                }
+
+                n_stack.push_back('N');
+
                 println!("R");
             }
             if char == '#' {
-                if !token_stack.is_empty() {
+                if !token_stack.is_empty() && n_stack.len() != 1 {
                     println!("RE");
                 }
                 return;
@@ -79,7 +111,7 @@ fn process_opg(para: &[String]) {
             token_stack.push_back(char);
         } else {
             if char == '#' {
-                if !token_stack.is_empty() {
+                if !token_stack.is_empty() && n_stack.len() != 1 {
                     println!("RE");
                 }
                 return;
@@ -110,7 +142,7 @@ impl PriorityBuilder {
                 [Priority::More, Priority::Less, Priority::Less, Priority::Less, Priority::More, Priority::More],
                 [Priority::More, Priority::More, Priority::Less, Priority::Less, Priority::More, Priority::More],
                 [Priority::More, Priority::More, Priority::None, Priority::None, Priority::More, Priority::More],
-                [Priority::Less, Priority::Less, Priority::Less, Priority::Less, Priority::Equal,Priority::None],
+                [Priority::Less, Priority::Less, Priority::Less, Priority::Less, Priority::Equal, Priority::None],
                 [Priority::More, Priority::More, Priority::None, Priority::None, Priority::More, Priority::More],
                 [Priority::Less, Priority::Less, Priority::Less, Priority::Less, Priority::Less, Priority::None],
             ]
