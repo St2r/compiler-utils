@@ -75,7 +75,7 @@ fn process_opg(para: &[String]) {
                 let s = token_stack.pop_back().unwrap();
                 p = pb.compare_priority(token_stack.back().unwrap(), &char);
 
-                if p == Priority::None {
+                if p == Priority::None && *token_stack.back().unwrap() != '#' {
                     println!("E");
                     return;
                 }
